@@ -30,7 +30,9 @@ To prepare your server, run the setup script:
 3. **Caddy:** Starts the reverse proxy to serve the website securely.
 4. **FastAPI:** Starts the backend server that handles your data.
 
-Once it says "SYSTEM IS RUNNING", you can open your web browser and go to `http://localhost:8081` to access your server!
+Once it says "SYSTEM IS RUNNING", you can access your server in two ways:
+1. **Locally:** Open your web browser and go to `http://localhost:8081`
+2. **Remotely (Anywhere in the world):** Using a mesh VPN like [Tailscale](https://tailscale.com), connect your phone or laptop to your Tailscale network and go to `http://<your-tailscale-ip>:8081`!
 
 ### Stop the Server
 When you are done, go to the terminal running the server and press `Ctrl+C`. The system will automatically catch this and gracefully shut everything down.

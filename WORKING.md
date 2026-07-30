@@ -4,7 +4,7 @@ This document explains the internal mechanisms, data flow, and cryptographic arc
 
 ## 1. System Topology
 The application relies on four primary components running concurrently:
-- **Caddy (Reverse Proxy):** Listens on port `8081`. It serves the static frontend HTML/JS/CSS files and routes all `/api/*` traffic to the FastAPI backend.
+- **Caddy (Reverse Proxy):** Listens on port `8081` across all network interfaces (`0.0.0.0`). This allows it to seamlessly accept connections from remote mesh VPNs like **Tailscale**. It serves the static frontend HTML/JS/CSS files and routes all `/api/*` traffic to the FastAPI backend.
 - **FastAPI (Backend):** Listens on port `8000`. Handles user authentication, database operations, and encryption routing.
 - **Vaultwarden (Docker):** Listens on port `8001`. A lightweight Rust implementation of the Bitwarden API, handling password vault functionality.
 - **Ollama (AI Daemon):** Runs locally on port `11434` to serve AI models for image tagging and smart search without relying on the cloud.
