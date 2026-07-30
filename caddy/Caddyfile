@@ -1,0 +1,17 @@
+http://localhost:8081 {
+    # Vaultwarden Reverse Proxy
+    handle /vault* {
+        reverse_proxy 127.0.0.1:8080
+    }
+
+    # FastAPI Reverse Proxy
+    handle /api* {
+        reverse_proxy 127.0.0.1:8000
+    }
+
+    # Static Frontend
+    handle {
+        root * frontend
+        file_server
+    }
+}

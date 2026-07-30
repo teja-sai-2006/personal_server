@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Server Dashboard</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Phosphor Icons for a clean, modern look) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- QR Code Scanner -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="glass-card login-box">
+            <div class="logo center-logo">
+                <i class="ph-fill ph-planet"></i>
+                <h1>Personal Server</h1>
+            </div>
+            <p class="login-subtext">Secure System Access</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="ph ph-user"></i>
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="input-group">
+                    <i class="ph ph-lock-key"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <div id="login-error" class="error-text"></div>
+                <button type="submit" class="cyber-btn">Authenticate</button>
+                <div style="margin-top: 1rem;">
+                    <a href="#" onclick="forgotPassword()" class="login-subtext" style="text-decoration: underline; cursor: pointer;">Forgot Password?</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-content" style="display: none;">
+        <!-- Header / Telemetry -->
+        <header class="glass-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="ph-fill ph-planet"></i>
+                    <h1>Personal Server</h1>
+                </div>
+                <div class="status-indicator">
+                    <span class="pulse-dot green"></span>
+                    <span class="status-text">System Online</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="telemetry">
+                    <div class="telemetry-badge">
+                        <i class="ph ph-cpu"></i>
+                        <span id="cpu-stat">12%</span>
+                    </div>
+                    <div class="telemetry-badge">
+                        <i class="ph ph-memory"></i>
+                        <span id="ram-stat">4.2GB</span>
+                    </div>
+                    <div class="telemetry-badge">
+                        <i class="ph ph-users"></i>
+                        <span id="users-stat">2 Active</span>
+                    </div>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar" onclick="logout()">
+                        <i class="ph ph-sign-out"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="dashboard-grid">
+            
+            <!-- Card 1: Passwords -->
+            <div class="glass-card interactive-card" onclick="openVault()">
+                <div class="card-icon">
+                    <i class="ph ph-lock-key"></i>
+                </div>
+                <div class="card-content">
+                    <h2>Passwords & 2FA</h2>
+                    <p>Zero-knowledge Vault</p>
+                </div>
+                <div class="card-action">
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- Card 2: Photos & Videos -->
+            <div class="glass-card interactive-card" onclick="openMedia()">
+                <div class="card-icon">
+                    <i class="ph ph-image"></i>
+                </div>
+                <div class="card-content">
+                    <h2>Photos & Videos</h2>
+                    <p>Encrypted private gallery</p>
+                </div>
+                <div class="card-action">
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- Card 3: Private AI -->
+            <div class="glass-card interactive-card" onclick="openAI()">
+                <div class="card-header-flex">
+                    <div class="card-icon">
+                        <i class="ph ph-brain"></i>
+                    </div>
+                    <span id="ai-badge" class="badge active" style="display:none;">Loading...</span>
+                </div>
+                <div class="card-content">
+                    <h2>Private AI</h2>
+                    <p>Chat with secure local models</p>
+                </div>
+                <div class="card-action">
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+            </div>
+
+            <!-- Card 4: Shared Folders -->
+            <div class="glass-card interactive-card" onclick="openShared()">
+                <div class="card-header-flex">
+                    <div class="card-icon">
+                        <i class="ph ph-folder-shared"></i>
+                    </div>
+                    <span id="shared-badge" class="badge warning" style="display:none;">0 Expiring Soon</span>
+                </div>
+                <div class="card-content">
+                    <h2>Shared Folders</h2>
+                    <p>View temporary shared access</p>
+                </div>
+                <div class="card-action">
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Feature Modals -->
+        
+        <!-- Gallery Modal -->
+        <div id="gallery-modal" class="modal-overlay" style="display: none;">
+            <div class="glass-card feature-modal">
+                <div class="modal-header">
+                    <h2><i class="ph ph-image"></i> Encrypted Gallery</h2>
+                    <button class="close-btn" onclick="closeModal('gallery-modal')"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="gallery-controls">
+                        <input type="file" id="media-upload-input" style="display: none;" multiple>
+                        <button class="cyber-btn sm" onclick="document.getElementById('media-upload-input').click()">Upload Files</button>
+                        <button class="cyber-btn sm outline" onclick="loadGallery()">Refresh</button>
+                    </div>
+                    <div id="bulk-action-bar" class="bulk-action-bar" style="display: none;">
+                        <span id="bulk-count">0 selected</span>
+                        <div class="bulk-buttons">
+                            <button class="action-btn" onclick="bulkDownload()"><i class="ph ph-download-simple"></i> Download</button>
+                            <button class="action-btn" onclick="bulkShare()"><i class="ph ph-share-network"></i> Share</button>
+                            <button class="action-btn delete-btn" onclick="bulkDelete()"><i class="ph ph-trash"></i> Delete</button>
+                            <button class="action-btn" onclick="clearSelection()"><i class="ph ph-x"></i></button>
+                        </div>
+                    </div>
+                    <div id="gallery-grid" class="gallery-grid">
+                        <!-- Media items dynamically injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat Modal -->
+        <div id="ai-modal" class="modal-overlay" style="display: none;">
+            <div class="glass-card feature-modal ai-feature-modal">
+                <div class="modal-header">
+                    <h2><i class="ph ph-brain"></i> Private AI Chat</h2>
+                    <div class="ai-status">
+                        <span id="ai-status-indicator" class="pulse-dot"></span>
+                        <span id="ai-status-text">Checking Status...</span>
+                    </div>
+                    <button class="close-btn" onclick="closeModal('ai-modal')"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body ai-layout">
+                    <!-- Sidebar -->
+                    <div class="ai-sidebar">
+                        <button onclick="newAIChat()" class="cyber-btn sm outline" style="width: 100%; margin-bottom: 1rem;"><i class="ph ph-plus"></i> New Chat</button>
+                        <div id="ai-history-list" class="ai-history-list">
+                            <!-- Sidebar history injected here -->
+                        </div>
+                    </div>
+                    <!-- Main Chat Area -->
+                    <div class="ai-main chat-container">
+                        <div class="ai-model-selector" style="margin-bottom: 1rem;">
+                            <select id="ai-model-select" class="cyber-select">
+                                <option value="">Loading models...</option>
+                            </select>
+                        </div>
+                        <div id="chat-history" class="chat-history">
+                            <div class="chat-msg ai">Welcome to the Private AI. All conversations are processed locally and securely.</div>
+                        </div>
+                        <form id="chat-form" class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Type your message..." required>
+                            <button type="submit" class="cyber-btn sm"><i class="ph ph-paper-plane-right"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shared Folders Modal -->
+        <div id="shared-modal" class="modal-overlay" style="display: none;">
+            <div class="glass-card feature-modal">
+                <div class="modal-header">
+                    <h2><i class="ph ph-folder-shared"></i> Shared Folders</h2>
+                    <button class="close-btn" onclick="closeModal('shared-modal')"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="vault-tabs">
+                        <button id="tab-with-me" class="vault-tab active" onclick="switchSharedTab('with-me')">Shared With You</button>
+                        <button id="tab-by-me" class="vault-tab" onclick="switchSharedTab('by-me')">Shared By You</button>
+                    </div>
+                    
+                    <div id="shared-with-me-section" class="vault-section active" style="flex:1; overflow-y:auto;">
+                        <div id="shared-list" class="shared-list">
+                            <!-- Shared with me items injected here -->
+                        </div>
+                    </div>
+                    
+                    <div id="shared-by-me-section" class="vault-section" style="display:none; flex:1; overflow-y:auto;">
+                        <div id="shared-by-me-list" class="shared-list">
+                            <!-- Shared by me items injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lightbox Modal -->
+        <div id="lightbox-modal" class="modal-overlay" style="display: none; z-index: 2000; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); flex-direction: column;">
+            <button class="close-btn" onclick="closeModal('lightbox-modal')" style="position: absolute; top: 2rem; right: 2rem; color: white; font-size: 2rem;"><i class="ph ph-x"></i></button>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 4rem;">
+                <img id="lightbox-img" src="" style="max-width: 100%; max-height: 100%; border-radius: 8px; object-fit: contain;">
+            </div>
+            <div id="lightbox-controls" class="lightbox-controls" style="padding: 1rem; display: flex; justify-content: center; gap: 1rem; background: rgba(0,0,0,0.8); border-top: 1px solid var(--card-border); width: 100%;">
+                <button class="cyber-btn sm outline" onclick="lightboxDownload()"><i class="ph ph-download-simple"></i> Download</button>
+                <button class="cyber-btn sm outline" onclick="lightboxShare()"><i class="ph ph-share-network"></i> Share</button>
+                <button class="cyber-btn sm" style="background: #ef4444; border-color: #ef4444; color: white;" onclick="lightboxDelete()"><i class="ph ph-trash"></i> Delete</button>
+            </div>
+        </div>
+
+        <!-- Custom Confirm Modal -->
+        <div id="custom-confirm" class="modal-overlay" style="display: none; z-index: 4000;">
+            <div class="glass-card" style="padding: 2rem; width: 90%; max-width: 400px; text-align: center;">
+                <h3 id="confirm-text" style="margin-bottom: 2rem;">Are you sure?</h3>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button id="confirm-cancel" class="cyber-btn outline" style="flex:1;">Cancel</button>
+                    <button id="confirm-ok" class="cyber-btn" style="flex:1; background: #ef4444; border-color: #ef4444; color: white;">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Prompt Modal -->
+        <div id="custom-prompt" class="modal-overlay" style="display: none; z-index: 4000;">
+            <div class="glass-card" style="padding: 2rem; width: 90%; max-width: 400px; text-align: center;">
+                <h3 id="prompt-text" style="margin-bottom: 1.5rem;">Enter text</h3>
+                <input type="text" id="prompt-input" style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 1rem; color: white; margin-bottom: 2rem; font-family: 'Outfit';">
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button id="prompt-cancel" class="cyber-btn outline" style="flex:1;">Cancel</button>
+                    <button id="prompt-ok" class="cyber-btn" style="flex:1;">Submit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Share Settings Modal -->
+        <div id="share-settings-modal" class="modal-overlay" style="display: none; z-index: 3000;">
+            <div class="glass-card" style="padding: 2rem; width: 90%; max-width: 400px; text-align: center;">
+                <h3 style="margin-bottom: 1.5rem;">Share Settings</h3>
+                <div style="text-align: left; margin-bottom: 1rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Target Username</label>
+                    <input type="text" id="share-username-input" placeholder="e.g. alice" style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 1rem; color: white; font-family: 'Outfit';">
+                </div>
+                <div style="text-align: left; margin-bottom: 2rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Expiration Time</label>
+                    <select id="share-expires-select" style="width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--neon-cyan); border-radius: 8px; padding: 1rem; color: white; font-family: 'Outfit'; appearance: none;">
+                        <option value="1">1 Day (24 hours)</option>
+                        <option value="2">2 Days (48 hours)</option>
+                        <option value="3">3 Days (72 hours)</option>
+                        <option value="4">4 Days (96 hours)</option>
+                        <option value="5">5 Days (120 hours)</option>
+                        <option value="6">6 Days (144 hours)</option>
+                        <option value="7">7 Days (Maximum)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button id="share-cancel" class="cyber-btn outline" style="flex:1;">Cancel</button>
+                    <button id="share-submit" class="cyber-btn" style="flex:1;">Share</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vault Modal (Passwords & 2FA) -->
+        <div id="vault-modal" class="modal-overlay" style="display: none;">
+            <div class="glass-card feature-modal">
+                <div class="modal-header">
+                    <h2><i class="ph ph-lock-key"></i> Secure Vault</h2>
+                    <button class="close-btn" onclick="closeModal('vault-modal')"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="vault-tabs">
+                        <button class="vault-tab active" onclick="switchVaultTab('passwords')">Passwords</button>
+                        <button class="vault-tab" onclick="switchVaultTab('auth')">Authenticator (2FA)</button>
+                    </div>
+                    
+                    <!-- Passwords Section -->
+                    <div id="vault-passwords-section" class="vault-section active">
+                        <form id="add-password-form" class="vault-form" onsubmit="addPassword(event)">
+                            <input type="text" id="pw-site" placeholder="Website / App Name" required class="cyber-input">
+                            <input type="text" id="pw-user" placeholder="Username / Email" required class="cyber-input">
+                            <div style="display: flex; gap: 0.5rem; width: 100%;">
+                                <input type="text" id="pw-pass" placeholder="Password" required class="cyber-input" style="flex:1;">
+                                <button type="button" class="cyber-btn sm outline" onclick="generatePassword()">Generate</button>
+                            </div>
+                            <button type="submit" class="cyber-btn sm" style="width: 100%;">Save Password</button>
+                        </form>
+                        <div id="passwords-list" class="vault-list">
+                            <!-- Password items injected here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Authenticator Section -->
+                    <div id="vault-auth-section" class="vault-section" style="display: none;">
+                        <div class="vault-form">
+                            <div id="qr-reader" style="width: 100%; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; display: none;"></div>
+                            <button class="cyber-btn sm outline" onclick="startQRScanner()" style="width: 100%;"><i class="ph ph-qr-code"></i> Scan QR Code</button>
+                            
+                            <form id="add-auth-form" onsubmit="addAuth(event)" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%; margin-top: 1rem;">
+                                <input type="text" id="auth-name" placeholder="Service Name (e.g. Google)" required class="cyber-input">
+                                <input type="text" id="auth-secret" placeholder="Setup Key / Secret" required class="cyber-input">
+                                <button type="submit" class="cyber-btn sm" style="width: 100%;">Add Authenticator</button>
+                            </form>
+                        </div>
+                        <div id="auth-list" class="vault-list" style="margin-top: 1rem;">
+                            <!-- Auth items injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal-overlay" style="display: none; z-index: 3000;">
+        <div class="glass-card feature-modal" style="max-width: 400px; width: 90%;">
+            <div class="modal-header">
+                <h2><i class="ph ph-user-plus"></i> Complete Registration</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    Set your master password. This will be used to encrypt your files and <b>cannot be recovered</b> if lost.
+                </p>
+                <form id="register-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <input type="password" id="reg-password" placeholder="Master Password" class="cyber-input" required>
+                    <input type="password" id="reg-confirm" placeholder="Confirm Password" class="cyber-input" required>
+                    <button type="submit" class="cyber-btn" style="width: 100%; justify-content: center;">Create Account</button>
+                </form>
+                <div id="reg-success" style="display: none; margin-top: 1rem; text-align: center;">
+                    <h3 style="color: var(--neon-cyan); margin-bottom: 0.5rem;">Registration Complete!</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Please save this Recovery Code. It is required to reset your account.</p>
+                    <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 4px; font-family: monospace; word-break: break-all;" id="reg-recovery-code"></div>
+                    <button class="cyber-btn outline" style="width: 100%; justify-content: center; margin-top: 1rem;" onclick="closeModal('register-modal'); window.location.hash = '';">Go to Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recover Password Modal -->
+    <div id="recover-modal" class="modal-overlay" style="display: none; z-index: 3000;">
+        <div class="glass-card feature-modal" style="max-width: 400px; width: 90%;">
+            <div class="modal-header">
+                <h2><i class="ph ph-warning"></i> Account Reset</h2>
+                <button class="close-btn" onclick="closeModal('recover-modal')"><i class="ph ph-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.85rem;">
+                    Enter your Recovery Code to regain access to your account without losing any data. Your keys will be securely rotated.
+                </p>
+                <form id="recover-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <input type="text" id="rec-username" placeholder="Username" class="cyber-input" required>
+                    <input type="text" id="rec-code" placeholder="Recovery Code" class="cyber-input" required>
+                    <input type="password" id="rec-new-password" placeholder="New Master Password" class="cyber-input" required>
+                    <button type="submit" class="cyber-btn" style="width: 100%; justify-content: center;">Recover Account</button>
+                </form>
+                <div id="rec-success" style="display: none; margin-top: 1rem; text-align: center;">
+                    <h3 style="color: var(--neon-cyan); margin-bottom: 0.5rem;">Account Reset!</h3>
+                    <p style="font-size: 0.85rem; margin-bottom: 1rem;">Your new Recovery Code is below:</p>
+                    <div style="background: rgba(0,0,0,0.5); padding: 1rem; border-radius: 4px; font-family: monospace; word-break: break-all;" id="rec-new-code"></div>
+                    <button class="cyber-btn outline" style="width: 100%; justify-content: center; margin-top: 1rem;" onclick="closeModal('recover-modal')">Go to Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

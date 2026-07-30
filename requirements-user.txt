@@ -1,0 +1,49 @@
+# System Requirements Guide
+
+To run the Personal Server locally across different Linux platforms (Arch, Ubuntu, Termux), you must install these system dependencies BEFORE running `setup.sh` or `start.sh`.
+
+## 1. Python 3
+The backend requires Python 3 and its virtual environment modules.
+- **Ubuntu/Debian:** `sudo apt update && sudo apt install python3 python3-venv python3-pip`
+- **Arch Linux:** `sudo pacman -S python python-pip`
+- **Termux:** `pkg install python`
+
+## 2. Docker (For Vaultwarden)
+Vaultwarden runs in a Docker container.
+- **Ubuntu/Debian:** `sudo apt install docker.io && sudo systemctl enable --now docker`
+- **Arch Linux:** `sudo pacman -S docker && sudo systemctl enable --now docker`
+- **Termux:** Docker does not run natively in Termux (requires root and a custom kernel). If you are using Termux, the Vaultwarden feature will automatically be skipped.
+
+*Note: The `start.sh` script assumes your user has docker permissions (or it will attempt to use `sudo`).*
+
+## 3. Caddy (Reverse Proxy)
+Caddy serves the frontend and routes API requests.
+- **Ubuntu/Debian:**
+  ```bash
+  sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+  curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+  sudo apt update && sudo apt install caddy
+  ```
+- **Arch Linux:** `sudo pacman -S caddy`
+- **Termux:** `pkg install caddy`
+
+## 4. Ollama (Local AI)
+Ollama powers the local AI interactions without external APIs.
+- **Installation (All Linux systems):**
+  ```bash
+  curl -fsSL https://ollama.com/install.sh | sh
+  ```
+  *(Note: For Termux, you may need a proot environment to run the standard Ollama binary).*
+
+- **Downloading Models:**
+  Before using the AI features, you must install the models. For example, to use Llama 3:
+  ```bash
+  ollama run llama3
+  ```
+  This will download the model (it may take a while). Once downloaded, type `/bye` to exit the Ollama prompt. The model will now be available when the server starts.
+
+## Next Steps
+Once you have these installed:
+1. Run `./setup.sh` to configure the Python environment and pull Docker images.
+2. Run `./start.sh` to start the server!

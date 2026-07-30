@@ -1,0 +1,25 @@
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual Environment
+venv/
+backend/venv/
+
+# Environment Variables & Secrets
+.env
+
+# User Data & Databases (CRITICAL: Never commit your personal data!)
+data/
+*.db
+*.sqlite3
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
