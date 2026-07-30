@@ -41,8 +41,9 @@ async def provision_user(username: str):
         print(f"Username: {username}")
         print(f"Expires In: 24 Hours")
         print("-" * 50)
-        print("Send this link to the user to complete registration:")
-        print(f"http://localhost:8081/#invite={token}")
+        print("Send the appropriate link below to the user to complete registration:")
+        print(f"Local Access:    http://localhost:8081/#invite={token}")
+        print(f"Remote (Tailscale): http://<your-tailscale-ip>:8081/#invite={token}")
         print("="*50 + "\n")
 
 if __name__ == "__main__":
